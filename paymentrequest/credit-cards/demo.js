@@ -87,15 +87,15 @@ function instrumentToJsonString(instrument) {
 
 const buyButton = document.getElementById('buyButton');
 buyButton.setAttribute('style', 'display: none;');
-if (!navigator.userAgent.match(/Android/i)) {
-  ChromeSamples.setStatus('Supported only on Android for now.');
-} else if ('PaymentRequest' in window) {
+if ('PaymentRequest' in window) {
   let request = initPaymentRequest();
   buyButton.setAttribute('style', 'display: inline;');
   buyButton.addEventListener('click', function() {
     onBuyClicked(request);
     request = initPaymentRequest();
   });
+} else if (!navigator.userAgent.match(/Android/i)) {
+  ChromeSamples.setStatus('Supported only on Android for now.');
 } else {
   ChromeSamples.setStatus('This browser does not support web payments');
 }

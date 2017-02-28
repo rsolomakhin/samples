@@ -28,13 +28,12 @@
  * is finished with failure.
  */
 function initPaymentRequest(onSuccess, onFailure) {
-  if (!navigator.userAgent.match(/Android/i)) {
-    onFailure('Supported only on Android for now.');
-    return;
-  }
-
   if (!('PaymentRequest' in window)) {
-    onFailure('This browser does not support web payments.');
+    if (!navigator.userAgent.match(/Android/i)) {
+      onFailure('Supported only on Android for now.');
+    } else {
+      onFailure('This browser does not support web payments.');
+    }
     return;
   }
 
@@ -140,18 +139,24 @@ function sendPaymentToServer(instrumentResponse) {
 /**
  * Converts the payment instrument into a JSON string.
  *
+ * @private
  * @param {PaymentResponse} instrument The instrument to convert.
  * @return {string} The JSON string representation of the instrument.
  */
 function instrumentToJsonString(instrument) {
-  if (instrument.toJSON) {
-    return JSON.stringify(instrument, undefined, 2);
-  } else {
-    return JSON.stringify({
-      methodName: instrument.methodName,
-      details: instrument.details,
-    }, undefined, 2);
+  let details = instrument.details;
+  if (details.cardNumber) {
+    details.cardNumber = 'XXXX-XXXX-XXXX-' + details.cardNumber.substr(12);
   }
+
+  if (details.cardSecurityCode) {
+    details.cardSecurityCode = '***';
+  }
+
+  return JSON.stringify({
+    methodName: instrument.methodName,
+    details: details,
+  }, undefined, 2);
 }
 
 /**
